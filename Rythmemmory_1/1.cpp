@@ -173,10 +173,11 @@ int main()
     bool waiting = false; // true когда открыты 2 непарные карты, в этот момент 
     // нельзя открывать другие и можно посмотреть на типы не одинаковых
     float waitTimer = 0.f; // ждёт пока пройдёт 1 секунда, чтобы снова можно было открывать карты
+    float dt;
 
     while (window.isOpen())
     {
-        float dt = clock.restart().asSeconds(); //возврщение знач с часов в секундах, сброс часов
+        dt = clock.restart().asSeconds(); //возврщение знач с часов в секундах, сброс часов
         if (waiting)
         {
             waitTimer += dt; // увеличиваем время которое показывает сколько мы ждем
@@ -222,17 +223,17 @@ int main()
                                 open_card2 = i; // запомнить её индекс
                                 if (is_pair(Cards[open_card1], Cards[open_card2])) //проверить на парность
                                 {
-                                    dt = clock.restart().asSeconds();
+                                    //dt = clock.restart().asSeconds();
 
-                                    points += 100;
-                                    Cards[open_card1].status = CardStatus::discarded;
+                                    points += 100;//начислить очки за пару
+                                    Cards[open_card1].status = CardStatus::discarded;//карты сделать сброшенными
                                     Cards[open_card2].status = CardStatus::discarded;
 
-                                    count_open_cards = 0;
+                                    count_open_cards = 0;//обнулить кол-во открытых карт
                                 }
                                 else
                                 {
-                                    waiting = true;
+                                    waiting = true;//включить ожидание на 1 сек
                                     waitTimer = 0.f;
 
                                 }
@@ -245,79 +246,85 @@ int main()
             }
         }
 
-        unsigned int count_discarded_cards = 0;
-        for (int i = 0; i < count_all_cards; i++)
+        unsigned int count_discarded_cards = 0;//счётчик сброшенных карт
+        for (int i = 0; i < count_all_cards; i++)//пробег по всем картам на столе
         {
-            if (Cards[i].status == CardStatus::open)
+            if (Cards[i].status == CardStatus::open)//если карта открыта
             {
                 sf::Texture* texture = getTextureByType(Cards[i].type, textures); // получить текстуру для этого типа карты
 
                 if (texture) {
-                    Cards[i].shape.setTexture(texture);
+                    Cards[i].shape.setTexture(texture);//загрузить текстуру на карту
                     Cards[i].shape.setFillColor(sf::Color::White);
                 }
             }
-            else if (Cards[i].status == CardStatus::close)
+            else if (Cards[i].status == CardStatus::close)//если карта закрыта
             {
 
-                Cards[i].shape.setTexture(nullptr);
-                Cards[i].shape.setFillColor(sf::Color::Green);
+                Cards[i].shape.setTexture(nullptr);// убрать текстуру
+                Cards[i].shape.setFillColor(sf::Color::Green);//поставить зелёную рубашку
 
             }
 
-            else
+            else //если карта сброшена
             {
-                count_discarded_cards += 1;
+                count_discarded_cards += 1;//считаем кол-во сброшенных карт
                 sf::Texture* texture = getTextureByType(Cards[i].type, textures); // получить текстуру для этого типа карты
 
                 if (texture) {
-                    Cards[i].shape.setTexture(texture);
+                    Cards[i].shape.setTexture(texture);//надеть текстуру на карту
                     Cards[i].shape.setFillColor(sf::Color::White);
                 }
-                Cards[i].timer += dt;
+                Cards[i].timer += dt;// зафиксировать когда сброшено
 
-                if (Cards[i].timer >= 2.f)
+                if (Cards[i].timer >= 2.f)// если сброшено 2 секунды назад
                 {
-                    Cards[i].shape.setTexture(nullptr);
+                    Cards[i].shape.setTexture(nullptr);//убрать карту со стола = надеть чёрную текстуру 
                     Cards[i].shape.setFillColor(sf::Color::Black);
                 }
 
             }
 
-            if (count_discarded_cards == count_all_cards)
+            if (count_discarded_cards == count_all_cards) // если все карты сброшены
             {
-                full_table(Cards);
+                full_table(Cards);// заполнить стол новыми картами
+                for (int i = 0; i < count_all_cards; i++)
+                {
+                    Cards[i].timer = 0;// сброс таймера у всех карт
+                }
+
             }
         }
 
         int i;
-        window.clear();
+        window.clear();// очистить окно
         for (i = 0; i < (count_all_cards / 2); i++)
         {
-            Cards[i].shape.setPosition({ 100.f + i * 400, 100.f });
+            Cards[i].shape.setPosition({ 100.f + i * 400, 100.f });//задаём позиции картам в 1 ряду
             Cards[i].draw(window);
         }
 
         points_txt.setPosition({ 100.f + i * 400, 100.f });
-        points_txt.setString(std::to_string(points));
+        points_txt.setString(std::to_string(points)); //задаём позицию очкам справа от 1 ряда
         window.draw(points_txt);
 
         for (i = count_all_cards / 2; i < count_all_cards; i++)
         {
-            Cards[i].shape.setPosition({ 100.f + (i - count_all_cards / 2) * 400, 600.f });
+            Cards[i].shape.setPosition({ 100.f + (i - count_all_cards / 2) * 400, 600.f });//задаём позиции картам в 2 ряду
             Cards[i].draw(window);
         }
 
-        timer_txt.setPosition({ 100.f + (i - count_all_cards / 2) * 400, 600.f });
+        timer_txt.setPosition({ 100.f + (i - count_all_cards / 2) * 400, 600.f });//задаём позицию таймеру справа от 2 ряда
         timer_txt.setString(std::to_string(gameTime));
         window.draw(timer_txt);
 
 
-        window.display();
+        window.display();//выводим в окно всё что нарисовали
 
-        if (gameTime >= 20.f)
+        if (gameTime >= 60.f)//если игра длится дольше, закрываем окно
         {
             window.close();
+
         }
     }
 }
