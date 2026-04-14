@@ -315,7 +315,7 @@ int main()
         }
 
         timer_txt.setPosition({ 100.f + (i - count_all_cards / 2) * 400, 600.f });//задаём позицию таймеру справа от 2 ряда
-        timer_txt.setString(std::to_string(gameTime));
+        timer_txt.setString(std::format("{:.2f}", 60 - gameTime));
         window.draw(timer_txt);
 
 
