@@ -1,2 +1,3 @@
-# Rythmemmory
-New game for a college project. It combines cards mechanics and rythm-games mechanics.
+# RythmMemory
+
+New game for a university project. It combines cards mechanics and rythm-games mechanics.
