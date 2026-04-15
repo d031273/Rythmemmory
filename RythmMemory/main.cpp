@@ -1,118 +1,13 @@
+#include "card.h"
+#include "utils.h"
+#include "game.h"
+
 #include <SFML/Graphics.hpp>
 #include <optional>
-#include <vector>
-#include <algorithm>
-#include <random>
 #include <iostream>
-#include <map>
-
-
-const unsigned int allCardsCount = 8;
-
-enum class CardStatus { opened, closed, discarded };
-enum class CardType { sunflower, gentian, ghostpipe, waterlily };
-std::vector<CardType> types = {
-    CardType::sunflower,
-    CardType::sunflower,
-    CardType::gentian,
-    CardType::gentian,
-    CardType::ghostpipe,
-    CardType::ghostpipe,
-    CardType::waterlily,
-    CardType::waterlily
-};
-
-
-std::ostream& operator<<(std::ostream& os, CardStatus status) { //две функции для вывода в cout новых типов
-    switch (status) {
-    case CardStatus::opened: return os << "open";
-    case CardStatus::closed: return os << "close";
-    case CardStatus::discarded: return os << "discarded";
-    }
-    return os;
-}
-std::string toString(CardType type) {
-    switch (type) {
-    case CardType::sunflower: return "sunflower";
-    case CardType::gentian: return "gentian";
-    case CardType::ghostpipe: return "ghostpipe";
-    case CardType::waterlily: return "waterlily";
-    }
-    return "unknown";
-}
-
-
-
-class Card {
-public:
-    CardType type; // растения
-    CardStatus status; // открыто, закрыто, сброшено
-    sf::RectangleShape shape; // визуальное представление карты, которое будет отриовано в окне
-    float timer = 0.f; // время после изменения состояния
-
-    Card() //конструктор по умолчанию - если не было передано параметров, нужен
-        // чтобы создать массив карт без заполнения данных
-    {
-        shape.setSize({ 250.f, 350.f }); // задать размер карты
-        shape.setFillColor(sf::Color::Green); //задать цвет заливки карты
-    }
-
-    Card(CardType cardType, CardStatus cardStatus) // конструктор с параметрами
-    {
-        type = cardType;
-        status = cardStatus;
-        shape.setSize({ 250.f, 350.f });
-        shape.setFillColor(sf::Color::Green);
-    }
-
-    
-
-
-    void draw(sf::RenderWindow& window) {//функция отрисовки карты добавлена в класс для удобства
-        window.draw(shape);
-    }
-
-
-};
-
-void dealCards(Card Cards[]) //фунция разложения стола
-{
-    //Копируем types 
-    std::vector<CardType> shuffledTypes = types;
-
-    // Перемешиваем
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(shuffledTypes.begin(), shuffledTypes.end(), g);
-
-    // Заполняем карты
-    for (unsigned int i = 0; i < allCardsCount; i++)
-    {
-        Cards[i].status = CardStatus::closed;
-        Cards[i].type = shuffledTypes[i];
-    }
-}
-
-bool isPair(Card card1, Card card2)// проверка карт на парность
-{
-    if (card1.type == card2.type)
-        return 1;
-    return 0;
-}
-
-sf::Texture* getTextureByType(CardType type, std::map<CardType, sf::Texture>& textures)
-// функция, которая проверяет получиось ли подгрузить текстуру, если получилось вернет текстуру
-{
-    auto it = textures.find(type);
-    if (it != textures.end())
-        return &it->second;
-    return nullptr;
-}
-
 
 int main()
 {
-
     sf::Texture sunflowerTexture; // создание переменных, где будут хранится текстуры
     sf::Texture gentianTexture;
     sf::Texture ghostpipeTexture;
@@ -122,8 +17,6 @@ int main()
     textures[CardType::gentian].loadFromFile("../Assets/gentian.png");
     textures[CardType::ghostpipe].loadFromFile("../Assets/ghostpipe.png");
     textures[CardType::waterlily].loadFromFile("../Assets/waterlily.png");
-
-
 
     sf::Font font;
     font.openFromFile("../Fonts/BRLNSR.TTF");//подгрузка шрифтов
@@ -136,8 +29,6 @@ int main()
     txtTimer.setCharacterSize(100);
     txtTimer.setFillColor(sf::Color::White);
 
-
-
     Card cards[allCardsCount]; // создание массива с картами, все карты созданы без параметров
 
     for (unsigned int i = 0; i < allCardsCount; i++)
@@ -149,19 +40,12 @@ int main()
         // ничего делать нельзя. В конце программы будет совершен расклад стола и программа начнёт нормальное выполнение.
     }
 
-
-
     cards[0].shape.setPosition({ 100.f, 100.f }); // лишняя строка, забыл удалить
-
-
 
     sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "My window"); //создание объекта окно под именем window
     //задаётся разрешение окна и его название
     window.setVerticalSyncEnabled(true); // включение вертикальной синхронизации
     window.setFramerateLimit(60); // установлен фреймрейт
-
-
-
 
     unsigned int openedCardsCount = 0; // подсчёт кол-ва открытых карт
     unsigned int openedCard1, openedCard2; // индексы карт в массиве cards которые сейчас открыты
@@ -221,7 +105,8 @@ int main()
                             else if (openedCardsCount == 2) // если открыто 2 карты
                             {
                                 openedCard2 = i; // запомнить её индекс
-                                if (isPair(cards[openedCard1], cards[openedCard2])) //проверить на парность
+                                
+                                if (Card::isPair(cards[openedCard1], cards[openedCard2])) //проверить на парность
                                 {
                                     //dt = clock.restart().asSeconds();
 
