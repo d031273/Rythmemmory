@@ -118,15 +118,15 @@ int main()
     sf::Texture ghost_pipeTexture;
     sf::Texture waterlilyTexture;
     std::map<CardType, sf::Texture> textures; // создание и заполнение словоря (тип карты -> текстура)
-    textures[CardType::sunflower].loadFromFile("../Flowers/sunflower.png");
-    textures[CardType::gentian].loadFromFile("../Flowers/gentian.png");
-    textures[CardType::ghost_pipe].loadFromFile("../Flowers/ghost_pipe.png");
-    textures[CardType::waterlily].loadFromFile("../Flowers/waterlily.png");
+    textures[CardType::sunflower].loadFromFile("../Assets/sunflower.png");
+    textures[CardType::gentian].loadFromFile("../Assets/gentian.png");
+    textures[CardType::ghost_pipe].loadFromFile("../Assets/ghost_pipe.png");
+    textures[CardType::waterlily].loadFromFile("../Assets/waterlily.png");
 
 
 
     sf::Font font;
-    font.openFromFile("../fonts/BRLNSR.TTF");//подгрузка шрифтов
+    font.openFromFile("../Fonts/BRLNSR.TTF");//подгрузка шрифтов
 
     sf::Text points_txt(font); // создание объекта текст для вывода очков
     points_txt.setCharacterSize(100);
