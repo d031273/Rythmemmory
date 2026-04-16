@@ -2,6 +2,8 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <chrono>
+#include <ctime>
 
 
 std::ostream& operator<<(std::ostream& os, CardStatus status) {

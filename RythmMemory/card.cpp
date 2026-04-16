@@ -13,7 +13,7 @@ std::vector<CardType> cardTypes = {
 
 Card::Card() {
 	shape.setSize({ 250.f, 350.f });
-	shape.setFillColor(sf::Color::Green);
+	shape.setFillColor(sf::Color::Black);
 }
 
 Card::Card(CardType cardType, CardStatus cardStatus) {
@@ -24,6 +24,17 @@ Card::Card(CardType cardType, CardStatus cardStatus) {
 }
 
 void Card::draw(sf::RenderWindow& window) {
+    /*switch (status) {
+    case CardStatus::opened:
+        shape.setTexture(frontSide);
+        break;
+    case CardStatus::closed:
+        shape.setTexture(backSide);
+        break;
+    case CardStatus::discarded:
+        shape.setTexture(nullptr);
+        break;
+    }*/
 	window.draw(shape);
 }
 

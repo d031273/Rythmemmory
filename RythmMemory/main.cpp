@@ -2,17 +2,25 @@
 #include "utils.h"
 #include "game.h"
 
+
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
 
+#include <SFML/Window.hpp>
+
 int main()
 {
-    sf::Texture sunflowerTexture; // создание переменных, где будут хранится текстуры
-    sf::Texture gentianTexture;
-    sf::Texture ghostpipeTexture;
-    sf::Texture waterlilyTexture;
+    sf::VideoMode vm = sf::VideoMode::getDesktopMode();
+    std::cout << "Size x: " << vm.size.x << " Size y: " << vm.size.y << std::endl;
+
+
+
+    sf::Texture backSideTexture;
+    backSideTexture.loadFromFile("../Assets/cardBackSide.png");
+
     std::map<CardType, sf::Texture> textures; // создание и заполнение словоря (тип карты -> текстура)
+    
     textures[CardType::sunflower].loadFromFile("../Assets/sunflower.png");
     textures[CardType::gentian].loadFromFile("../Assets/gentian.png");
     textures[CardType::ghostpipe].loadFromFile("../Assets/ghostpipe.png");
@@ -31,18 +39,28 @@ int main()
 
     Card cards[allCardsCount]; // создание массива с картами, все карты созданы без параметров
 
-    for (unsigned int i = 0; i < allCardsCount; i++)
-    {
-        cards[i].status = CardStatus::discarded; // присвоение всем картам статуса сброшено
-        // это происходит до создания окна и зацикливания программы.
-        // это необходимо, т.к. условие раскладывания нового стола - это все карты сброшены.
-        // при первом проходе программа пройдёт почти до конца ничего не выполнив, так с сброшенными картами
-        // ничего делать нельзя. В конце программы будет совершен расклад стола и программа начнёт нормальное выполнение.
+
+
+    for (int i = 0; i < allCardsCount; i++) {
+        sf::Texture* texture = getTextureByType(cards[i].type, textures); // получить текстуру для этого типа карты
+        if (texture) {
+            cards[i].frontSide = texture;
+            cards[i].backSide = &backSideTexture;
+        }
     }
 
-    cards[0].shape.setPosition({ 100.f, 100.f }); // лишняя строка, забыл удалить
+    //for (unsigned int i = 0; i < allCardsCount; i++) {
+    //    cards[i].status = CardStatus::discarded; // присвоение всем картам статуса сброшено
+    //    // это происходит до создания окна и зацикливания программы.
+    //    // это необходимо, т.к. условие раскладывания нового стола - это все карты сброшены.
+    //    // при первом проходе программа пройдёт почти до конца ничего не выполнив, так с сброшенными картами
+    //    // ничего делать нельзя. В конце программы будет совершен расклад стола и программа начнёт нормальное выполнение.
+    //}
 
-    sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "My window"); //создание объекта окно под именем window
+    //cards[0].shape.setPosition({ 100.f, 100.f }); // лишняя строка, забыл удалить
+
+    //sf::RenderWindow window(sf::VideoMode({ (vm.size.x * 80)/100, (vm.size.y * 80) / 100 }), "My window"); //создание объекта окно под именем window
+    sf::RenderWindow window(sf::VideoMode({ 1920, 1080}), "My window");
     //задаётся разрешение окна и его название
     window.setVerticalSyncEnabled(true); // включение вертикальной синхронизации
     window.setFramerateLimit(60); // установлен фреймрейт
@@ -59,15 +77,12 @@ int main()
     float waitTimer = 0.f; // ждёт пока пройдёт 1 секунда, чтобы снова можно было открывать карты
     float dt;
 
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         dt = clock.restart().asSeconds(); //возврщение знач с часов в секундах, сброс часов
-        if (waiting)
-        {
+        if (waiting) {
             waitTimer += dt; // увеличиваем время которое показывает сколько мы ждем
 
-            if (waitTimer >= 1.f) // если подождали 1 секунду
-            {
+            if (waitTimer >= 1.f) { // если подождали 1 секунду
                 cards[openedCard1].status = CardStatus::closed;//закрываем карты
                 cards[openedCard2].status = CardStatus::closed;
 
@@ -78,15 +93,13 @@ int main()
 
         gameTime += dt; // подсчёт кол-ва времени в игре, потом пойдёт в таймер
 
-        while (const std::optional event = window.pollEvent()) // объяснил optional в примере выше
-            // 
-        {
-
+        while (const std::optional event = window.pollEvent()) { // объяснил optional в примере выше
             if (event->is<sf::Event::Closed>()) //закрытие окна
                 window.close();
 
-            if ((event->is<sf::Event::MouseButtonPressed>()) && (!waiting)) // если обнаружено нажатие мыши
-            {
+            // ====================== Обработка действий пользователя??
+
+            if ((event->is<sf::Event::MouseButtonPressed>()) && (!waiting)) { // если обнаружено нажатие мыши
                 const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
                 if (mouseEvent->button == sf::Mouse::Button::Left) // если обнаружено левое нажатие мыши
                 {
@@ -109,6 +122,7 @@ int main()
                                 if (Card::isPair(cards[openedCard1], cards[openedCard2])) //проверить на парность
                                 {
                                     //dt = clock.restart().asSeconds();
+                                    std::cout << "Пара";
 
                                     points += 100;//начислить очки за пару
                                     cards[openedCard1].status = CardStatus::discarded;//карты сделать сброшенными
@@ -131,6 +145,8 @@ int main()
             }
         }
 
+        // ====================== Игровая логика
+
         unsigned int discardedCardsCount = 0;//счётчик сброшенных карт
         for (int i = 0; i < allCardsCount; i++)//пробег по всем картам на столе
         {
@@ -139,6 +155,7 @@ int main()
                 sf::Texture* texture = getTextureByType(cards[i].type, textures); // получить текстуру для этого типа карты
 
                 if (texture) {
+                    
                     cards[i].shape.setTexture(texture);//загрузить текстуру на карту
                     cards[i].shape.setFillColor(sf::Color::White);
                 }
@@ -181,16 +198,18 @@ int main()
             }
         }
 
+        // ====================== Я так понимаю рендеринг
         int i;
         window.clear();// очистить окно
         for (i = 0; i < (allCardsCount / 2); i++)
         {
-            cards[i].shape.setPosition({ 100.f + i * 400, 100.f });//задаём позиции картам в 1 ряду
+            cards[i].shape.setPosition({ 100.f + i * 300, 100.f });//задаём позиции картам в 1 ряду
             cards[i].draw(window);
         }
 
         txtPoints.setPosition({ 100.f + i * 400, 100.f });
         txtPoints.setString(std::to_string(points)); //задаём позицию очкам справа от 1 ряда
+
         window.draw(txtPoints);
 
         for (i = allCardsCount / 2; i < allCardsCount; i++)

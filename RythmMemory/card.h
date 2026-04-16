@@ -3,14 +3,17 @@
 #include <vector>
 
 enum class CardStatus { opened, closed, discarded };
-enum class CardType { notisflower, sunflower, gentian, ghostpipe, waterlily };
+enum class CardType { notIsFlower, sunflower, gentian, ghostpipe, waterlily };
 
 extern std::vector<CardType> cardTypes;
 
 class Card {
 public:
-    CardType type = CardType::notisflower;
-    CardStatus status = CardStatus::closed;
+    CardType type = CardType::notIsFlower;
+    CardStatus status = CardStatus::discarded;
+    
+    const sf::Texture* frontSide;
+    const sf::Texture* backSide;
 
     sf::RectangleShape shape;
 
