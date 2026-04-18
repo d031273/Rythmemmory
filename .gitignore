@@ -10,3 +10,4 @@ Release/
 *.ipch
 *.pdb
 *.cache
+*.dll
